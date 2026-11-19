@@ -10,7 +10,6 @@
   var PRODUCTS = window.MM_PRODUCTS || [];
   var BRANDS = window.MM_BRANDS || [];
   var app = document.getElementById("app");
-  document.documentElement.classList.add("js");
 
   /* ---------- utilities ---------- */
   function esc(s) {
@@ -63,7 +62,6 @@
     building: '<path d="M4 21V5l8-2v18M12 8l8 2v11M3 21h18M8 8h0M8 12h0M8 16h0M16 13h0M16 17h0"/>',
     fb: '<path d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v7h4v-7h3l1-4h-4V8z"/>',
     li: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10v7M8 7v0M12 17v-4a2 2 0 0 1 4 0v4M12 10v7"/>',
-    eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
     globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/>'
   };
   function icon(name, cls) {
@@ -71,7 +69,6 @@
   }
   var CAT_ICON = { gloves: "glove", masks: "mask", respiratory: "lungs", diagnostics: "pulse", injection: "syringe", wound: "bandage" };
   function catIcon(c) { return icon(CAT_ICON[c] || "list"); }
-  function catIconFilled(c) { return '<svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[CAT_ICON[c] || "list"] || "") + "</svg>"; }
   function productVisual(p, alt) {
     if (p && p.image) return '<img src="' + esc(p.image) + '" alt="' + esc(alt || p.name) + '" loading="lazy" decoding="async" onerror="this.replaceWith(document.createRange().createContextualFragment(this.dataset.fb))" data-fb="' + esc(catIcon(p.category)) + '">';
     return catIcon(p ? p.category : "");
@@ -110,7 +107,6 @@
     var n = quote.length, c = el("cartCount"), b = el("cartBtn");
     if (c) c.textContent = n;
     if (b) b.setAttribute("aria-label", "Quote list, " + plural(n, "item"));
-    var hc = el("heroCount"); if (hc) hc.textContent = n;
   }
 
   /* ---------- cart drawer ---------- */
@@ -207,10 +203,8 @@
   function render() {
     var r = currentRoute(), view = ROUTES[r.name] || viewNotFound;
     try {
-      runCleanups();
-      app.innerHTML = '<div class="page' + (r.name === "home" ? "" : " inner") + '">' + view(r) + "</div>";
+      app.innerHTML = '<div class="page">' + view(r) + "</div>";
       if (view.after) view.after(r);
-      initReveal();
     } catch (err) {
       if (window.console) console.error(err);
       app.innerHTML = '<div class="wrap section"><div class="empty"><h3>Something went wrong</h3><p>Please reload the page. Your quote list is saved.</p><a class="btn primary" href="#home">Back to home</a></div></div>';
@@ -219,7 +213,7 @@
       var k = a.getAttribute("data-nav"), on = k === r.name || (k === "catalogue" && r.name === "product");
       a.classList.toggle("on", on); if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
-    closeMenu();
+    closeDrawer();
     if (lastHash !== null && lastHash !== location.hash) { window.scrollTo(0, 0); try { app.focus({ preventScroll: true }); } catch (e) {} }
     lastHash = location.hash;
     document.title = (view.title ? view.title(r) + " | " : "") + "Merit Medical Maldives";
@@ -239,72 +233,44 @@
       '<div class="pbody"><span class="brandline">' + esc(p.brand) + "</span><h3>" + esc(p.name) + "</h3><p>" + esc(p.summary) + "</p>" +
       '<span class="go">' + (cfg ? "Choose options" : "Add to quote") + icon("arrow") + "</span></div></a>";
   }
-  function cta() {
-    return '<section class="sec lime-band cta"><svg class="bg-contours" aria-hidden="true"><use href="contours.svg#b"/></svg><div class="wrap rv">' +
-      '<h2><span class="sans">One list.</span><span class="serif">Every island.</span></h2>' +
-      "<p>Send us everything your hospital, clinic or resort needs. We come back with pricing and delivery for your atoll.</p>" +
-      '<div class="acts"><a class="btn primary" href="#catalogue">Start a quote ' + icon("arrow") + '</a><a class="btn" href="tel:' + esc(tel()) + '">Call ' + esc(CFG.phone) + "</a></div></div></section>";
+  function band() {
+    return '<section class="section"><div class="wrap"><div class="band"><div><h2>Ordering for a hospital, clinic or resort?</h2><p>Send us your full list and we will come back with pricing and delivery times for your island.</p></div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="#catalogue">Start a quote</a><a class="btn ghost" href="tel:' + esc(tel()) + '">Call ' + esc(CFG.phone) + "</a></div></div></div></section>";
   }
-  var band = cta;
   function tel() { return String(CFG.phone || "").replace(/[^\d+]/g, ""); }
   function searchBox(id, cls, val, ph) {
-    return '<form class="' + (cls || "search") + '" role="search" data-search>' + icon("search") + '<label class="sr-only" for="' + id + '">Search products</label><input id="' + id + '" type="search" placeholder="' + esc(ph || "Search by product name or item code") + '" autocomplete="off" enterkeyhint="search" value="' + esc(val || "") + '">' + (cls === "hero-search" ? '<button class="btn primary sm" type="submit">Search</button>' : "") + "</form>";
+    return '<form class="search ' + (cls || "") + '" role="search" data-search>' + icon("search") + '<label class="sr-only" for="' + id + '">Search products</label><input id="' + id + '" type="search" placeholder="' + esc(ph || "Search by product name or item code") + '" autocomplete="off" enterkeyhint="search" value="' + esc(val || "") + '">' + (cls === "cat-search" ? "" : '<button class="btn primary sm" type="submit">Search</button>') + "</form>";
   }
-  function words(html) {
-    // split "plain *serif* plain" into word spans for the scroll-lit statement
-    return html.split(/(\*[^*]+\*)/).map(function (part) {
-      var serif = /^\*.*\*$/.test(part); part = part.replace(/\*/g, "");
-      return part.split(/\s+/).filter(Boolean).map(function (w) { return '<span class="w' + (serif ? " serif" : "") + '">' + esc(w) + "</span>"; }).join(" ");
-    }).join(" ");
-  }
-  var STAR = '<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z"/></svg>';
 
   /* ---------- HOME ---------- */
   function viewHome() {
-    var cats = CATS.map(function (c) { return c.name.split(" ")[0]; });
-    var h = '<section class="hero" id="hero"><svg class="bg-contours" aria-hidden="true"><use href="contours.svg#b"/></svg>' +
-      '<div class="hero-stage"><div class="hero-art" id="heroArt" aria-hidden="true">' +
-      '<svg class="hero-lines" viewBox="0 0 1539 1380"><use href="mark-contours.svg#t"/></svg>' +
-      '<div class="hero-color"><svg viewBox="-0 -4 1004 848"><use href="logo-mark.svg#m"/></svg></div></div></div>' +
-      '<div class="hero-copy"><h1 class="hero-title"><span class="sans">Medical supply</span><span class="serif">for every island</span></h1>' +
-      '<p class="hero-sub">Gloves, protective equipment, respiratory devices, diagnostics and consumables for hospitals, clinics, resorts and pharmacies across the Maldives.</p>' +
-      searchBox("hq", "hero-search", "", "Search gloves, masks, oxygen, item code") + "</div>" +
-      '<a class="hero-card" href="#quote" id="heroCard"><span class="cap muted">Your quote list</span><span class="big num" id="heroCount">' + quote.length + '</span><span class="muted" style="font-size:.85rem">' + (quote.length === 1 ? "item" : "items") + ' saved</span><br><span class="go">' + (quote.length ? "Review list" : "Start a list") + icon("arrow") + "</span></a>" +
-      '<div class="lock"><small>Move to explore<br>Tap to reveal</small><button type="button" id="lockBtn" aria-pressed="false" aria-label="Reveal the full-colour logo">' + icon("eye") + "</button></div></section>";
-
-    h += '<section class="deep statement"><svg class="bg-contours" aria-hidden="true"><use href="contours.svg#b"/></svg><div class="wrap">' +
-      '<div class="stmt-meta"><svg viewBox="-0 -4 1004 848" aria-hidden="true"><use href="logo-mark.svg#m"/></svg><span class="cap">Merit Medical Maldives, Malé</span></div>' +
-      '<p class="stmt" id="stmt">' + words("We *import,* distribute and *support* medical devices, equipment and disposables for hospitals, clinics, resorts and pharmacies on *every atoll.*") + "</p></div></section>";
-
-    var seq = cats.map(function (c, i) { return '<span class="' + (i % 2 ? "sans outline" : "sans") + '">' + esc(c) + "</span>" + STAR; }).join("");
-    h += '<div class="marquee" aria-hidden="true"><div class="track" id="track"><span>' + seq + "</span><span>" + seq + "</span></div></div>";
-
-    h += '<section class="sec deep"><svg class="bg-contours" aria-hidden="true"><use href="contours.svg#b"/></svg><div class="wrap">' +
-      '<div class="sec-head rv"><h2 class="title-mix"><span class="sans">The</span><span class="serif">catalogue</span></h2><p>Six departments, every item configured down to the exact size and pack. Hover a category, then step inside.</p></div><div class="hall-grid">' +
-      CATS.map(function (c, i) {
+    var h = '<section class="hero"><div class="wrap hero-grid"><div>' +
+      "<h1>Medical supplies for every island in the Maldives</h1>" +
+      '<p class="lead">Gloves, protective equipment, respiratory devices, diagnostics and everyday consumables. Choose exactly what you need, build one list, and we reply with a quotation.</p>' +
+      searchBox("hq", "", "", "Search gloves, masks, oxygen, item code…") +
+      '<div class="trust"><span>' + icon("shield") + "MFDA authorised importer</span><span>" + icon("boat") + "Delivery across the atolls</span><span>" + icon("building") + "Part of VIYANA Pvt Ltd</span></div>" +
+      '</div><div class="dir"><h2>Browse by category</h2>' +
+      CATS.map(function (c) {
         var n = PRODUCTS.filter(function (p) { return p.category === c.id; }).length;
-        return '<a class="hall-tile rv" href="#c-' + c.id + '" style="transition-delay:' + (i % 3) * 60 + 'ms"><div class="hall-top"><span class="cap">' + plural(n, "product line") + '</span><span class="n">' + ("0" + (i + 1)).slice(-2) + "</span></div>" +
-          '<div class="hall-ico">' + catIcon(c.id).replace("<svg", '<svg class="off"') + catIconFilled(c.id) + "</div>" +
-          "<div><h3>" + esc(c.name) + "</h3><p>" + esc(c.blurb) + "</p></div></a>";
+        return '<a href="#c-' + c.id + '"><span class="ico">' + catIcon(c.id) + "</span><span><b>" + esc(c.name) + "</b><small>" + plural(n, "product line") + "</small></span>" + icon("arrow", "arr") + "</a>";
       }).join("") + "</div></div></section>";
 
-    h += '<section class="sec"><div class="wrap"><div class="sec-head rv"><h2 class="title-mix"><span class="sans">Quote in</span><span class="serif">three moves</span></h2><p>No account. No checkout. Our sales team prices your list and replies.</p></div><div class="laps">' +
-      [["Pick", "Choose the exact item", "Material, size, pack. One step at a time. Combinations we do not stock cannot be selected."],
-       ["List", "Build one quote list", "Everything your ward, clinic or resort needs, with quantities and notes. Saved on this device."],
-       ["Send", "Get your quotation", "A reference number straight away, then prices and delivery for your island from our team."]]
-        .map(function (s) { return '<div class="lap rv"><span class="word">' + s[0] + "</span><h3>" + s[1] + "</h3><p>" + s[2] + "</p></div>"; }).join("") + "</div></div></section>";
+    h += '<section class="section"><div class="wrap"><div class="sec-head"><h2>Requesting a quote takes a few minutes</h2><p>No account and no checkout. Pricing comes back from our sales team.</p></div><div class="how">' +
+      [["sliders", "Pick the exact item", "Choose material, size and pack one step at a time. Combinations we do not stock cannot be selected."],
+       ["list", "Build one list", "Add everything your ward, clinic or resort needs, with quantities and notes. It stays saved on this device."],
+       ["send", "Send the request", "You get a reference number straight away, and our team replies with prices and delivery for your island."]]
+        .map(function (s) { return "<div>" + icon(s[0]) + "<span><h3>" + s[1] + "</h3><p>" + s[2] + "</p></span></div>"; }).join("") + "</div></div></section>";
 
     var featured = ["nitrile-exam-gloves", "oxygen-concentrator", "surgical-masks", "bp-monitor"].map(function (id) { return byId(PRODUCTS, id); }).filter(Boolean);
-    h += '<section class="sec" style="padding-top:0"><div class="wrap"><div class="sec-head rv"><h2 class="title-mix"><span class="sans">Most</span><span class="serif">requested</span></h2><a class="link" href="#catalogue">See all ' + PRODUCTS.length + " product lines</a></div>" +
-      '<div class="grid-products">' + featured.map(productCard).join("") + "</div></div></section>";
+    h += '<section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>Most requested</h2><a class="link" href="#catalogue">See all products</a></div><div class="grid-products">' + featured.map(productCard).join("") + "</div></div></section>";
 
-    if (BRANDS.length) h += '<section class="sec" style="padding-top:0"><div class="wrap"><div class="sec-head rv"><h2 class="title-mix"><span class="sans">Brands</span><span class="serif">we supply</span></h2></div><div class="brands rv">' + BRANDS.map(brandCell).join("") + "</div></div></section>";
-    return h + cta();
+    if (BRANDS.length) h += '<section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>Brands we supply</h2></div><div class="brands">' + BRANDS.map(brandCell).join("") + "</div></div></section>";
+    return h + band();
   }
-  viewHome.after = function () { bindSearchForms(); initHero(); initStatement(); initMarquee(); };
+  viewHome.after = bindSearchForms;
   function brandCell(b) {
     var inner = b.logo ? '<img src="' + esc(b.logo) + '" alt="' + esc(b.name) + '" loading="lazy">' :
-      '<span class="wordmark"><i aria-hidden="true">' + esc(b.name.charAt(0)) + "</i>" + esc(b.name.slice(1)) + "</span>";
+      '<span class="wordmark"><i aria-hidden="true">' + esc(b.name.charAt(0)) + "</i>" + esc(b.name) + "</span>";
     return '<div class="brand-cell">' + inner + "</div>";
   }
   function bindSearchForms() {
@@ -314,102 +280,6 @@
         if (currentRoute().name === "catalogue") drawResults(); else location.hash = "catalogue";
       });
     });
-  }
-
-  /* ---------- motion ---------- */
-  var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var cleanups = [];
-  function onCleanup(fn) { cleanups.push(fn); }
-  function runCleanups() { while (cleanups.length) { try { cleanups.pop()(); } catch (e) {} } }
-
-  function initHero() {
-    var hero = el("hero"), art = el("heroArt"), lock = el("lockBtn"); if (!hero || !art) return;
-    var color = $(".hero-color", art);
-    var tx = 0.5, ty = 0.46, cx = tx, cy = ty, raf = 0, auto = true, t0 = performance.now(), lastMove = 0;
-    function frame(now) {
-      if (auto && !reduced) {           // drift slowly when nobody is pointing
-        var t = (now - t0) / 1000;
-        tx = 0.5 + Math.cos(t * 0.55) * 0.26; ty = 0.48 + Math.sin(t * 0.8) * 0.22;
-      }
-      cx += (tx - cx) * 0.12; cy += (ty - cy) * 0.12;
-      color.style.setProperty("--mx", (cx * 100).toFixed(2) + "%");
-      color.style.setProperty("--my", (cy * 100).toFixed(2) + "%");
-      if (auto && now - lastMove > 4000) {} // keep drifting
-      raf = requestAnimationFrame(frame);
-    }
-    function point(e) {
-      var r = color.getBoundingClientRect(); if (!r.width) return;
-      var p = e.touches ? e.touches[0] : e;
-      tx = (p.clientX - r.left) / r.width; ty = (p.clientY - r.top) / r.height;
-      auto = false; lastMove = performance.now();
-    }
-    function leave() { auto = true; t0 = performance.now() - Math.acos(Math.max(-1, Math.min(1, (cx - 0.5) / 0.26))) / 0.55 * 1000; }
-    hero.addEventListener("pointermove", point);
-    hero.addEventListener("pointerleave", leave);
-    hero.addEventListener("touchmove", point, { passive: true });
-    lock.addEventListener("click", function () {
-      var on = !hero.classList.contains("locked");
-      hero.classList.toggle("locked", on); lock.setAttribute("aria-pressed", String(on));
-      lock.setAttribute("aria-label", on ? "Return to the contour view" : "Reveal the full-colour logo");
-    });
-    // only animate while the hero is on screen
-    var vis = true, io = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
-      vis = es[0].isIntersecting;
-      if (vis && !raf) raf = requestAnimationFrame(frame);
-      if (!vis && raf) { cancelAnimationFrame(raf); raf = 0; }
-    }) : null;
-    if (io) io.observe(hero);
-    raf = requestAnimationFrame(frame);
-    onCleanup(function () { cancelAnimationFrame(raf); raf = 0; if (io) io.disconnect(); });
-  }
-
-  function initStatement() {
-    var p = el("stmt"); if (!p) return;
-    var ws = $$(".w", p);
-    if (reduced) { ws.forEach(function (w) { w.classList.add("on"); }); return; }
-    function upd() {
-      var r = p.getBoundingClientRect(), vh = window.innerHeight;
-      var prog = (vh * 0.85 - r.top) / (r.height + vh * 0.35);
-      var n = Math.round(Math.max(0, Math.min(1, prog)) * ws.length);
-      for (var i = 0; i < ws.length; i++) ws[i].classList.toggle("on", i < n);
-    }
-    addScroll(upd); upd();
-  }
-
-  function initMarquee() {
-    var t = el("track"); if (!t) return;
-    var x = 0, last = window.scrollY, v = 0, raf = 0, dir = -1;
-    function frame() {
-      var y = window.scrollY, d = y - last; last = y;
-      if (d) dir = d > 0 ? -1 : 1;
-      v += (Math.abs(d) * 0.35 - v) * 0.1;
-      x += dir * (0.6 + v);
-      var half = t.scrollWidth / 2; if (half) { if (x <= -half) x += half; if (x > 0) x -= half; }
-      t.style.transform = "translate3d(" + x.toFixed(1) + "px,0,0)";
-      raf = requestAnimationFrame(frame);
-    }
-    if (!reduced) raf = requestAnimationFrame(frame);
-    onCleanup(function () { cancelAnimationFrame(raf); });
-  }
-
-  var scrollFns = [];
-  function addScroll(fn) { scrollFns.push(fn); onCleanup(function () { var i = scrollFns.indexOf(fn); if (i > -1) scrollFns.splice(i, 1); }); }
-  var ticking = false;
-  window.addEventListener("scroll", function () {
-    if (ticking) return; ticking = true;
-    requestAnimationFrame(function () { ticking = false; scrollFns.forEach(function (f) { f(); }); hdrScroll(); });
-  }, { passive: true });
-
-  var lastY = 0, hdr = el("hdr");
-  function hdrScroll() { hdr.classList.toggle("scrolled", window.scrollY > 40); }
-
-  function initReveal() {
-    var els = $$(".rv");
-    if (reduced || !("IntersectionObserver" in window)) { els.forEach(function (e) { e.classList.add("seen"); }); return; }
-    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("seen"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -8% 0px" });
-    els.forEach(function (e) { io.observe(e); });
-    setTimeout(function () { els.forEach(function (e) { e.classList.add("seen"); }); }, 2500); // never leave content hidden
-    onCleanup(function () { io.disconnect(); });
   }
 
   /* ---------- CATALOGUE ---------- */
@@ -429,13 +299,13 @@
     curCat = byId(CATS, r.cat) ? r.cat : "";
     var c = byId(CATS, curCat);
     return '<div class="wrap">' + crumbs(c ? [["Products", "#catalogue"], [c.name]] : [["Products"]]) +
-      '<div class="page-head"><h1>' + (c ? '<span class="sans">' + esc(c.name.split(" & ")[0]) + "</span>" + (c.name.indexOf(" & ") > -1 ? '<span class="serif">&amp; ' + esc(c.name.split(" & ")[1]) + "</span>" : "") : '<span class="sans">All</span><span class="serif">products</span>') + "</h1><p>" + (c ? esc(c.blurb) : "Search or filter, then open a product to choose options and add it to your quote.") + "</p></div>" +
+      '<div class="page-head"><h1>' + (c ? esc(c.name) : "All products") + "</h1><p>" + (c ? esc(c.blurb) : "Search or filter, then open a product to choose options and add it to your quote.") + "</p></div>" +
       '<div class="cat-layout"><aside class="filters" aria-label="Categories"><h2>Category</h2><div class="chips">' +
       '<a class="chip' + (!curCat ? " on" : "") + '" href="#catalogue"' + (!curCat ? ' aria-current="page"' : "") + '>All products <span class="n">' + PRODUCTS.length + "</span></a>" +
       CATS.map(function (x) {
         var n = PRODUCTS.filter(function (p) { return p.category === x.id; }).length, on = curCat === x.id;
         return '<a class="chip' + (on ? " on" : "") + '" href="#c-' + x.id + '"' + (on ? ' aria-current="page"' : "") + ">" + esc(x.name) + ' <span class="n">' + n + "</span></a>";
-      }).join("") + "</div></aside><div>" + searchBox("cq", "search", state.q, "Search by name, brand or item code") + '<div id="results"></div></div></div></div>';
+      }).join("") + "</div></aside><div>" + searchBox("cq", "cat-search", state.q, "Search by name, brand or item code") + '<div id="results"></div></div></div></div>';
   }
   viewCatalogue.title = function (r) { var c = byId(CATS, r.cat); return c ? c.name : "Products"; };
   viewCatalogue.after = function () {
@@ -460,7 +330,7 @@
     var c = byId(CATS, p.category), specs = p.specs || {};
     var rows = Object.keys(specs).map(function (k) { return "<tr><th scope=\"row\">" + esc(k) + "</th><td>" + esc(specs[k]) + "</td></tr>"; }).join("");
     return '<div class="wrap">' + crumbs([["Products", "#catalogue"]].concat(c ? [[c.name, "#c-" + c.id]] : []).concat([[p.name]])) +
-      '<div class="prod"><div class="p-gal"><div class="gallery"><svg class="bg-contours" aria-hidden="true"><use href="contours.svg#b"/></svg><span class="gal-cap cap">' + esc(c ? c.name : "") + '</span>' + (p.steps && p.steps.length ? '<span class="gal-count">' + p.variants.length + "</span>" : "") + '<div class="pimg">' + productVisual(p, p.name) + '</div><span class="gal-sku" id="galSku">' + esc(p.variants.length === 1 ? p.variants[0].sku : p.variants.length + " configurations") + "</span></div></div>" +
+      '<div class="prod"><div class="p-gal"><div class="gallery"><div class="pimg">' + productVisual(p, p.name) + "</div></div></div>" +
       '<div class="p-info"><span class="brandline">' + esc(p.brand) + "</span><h1>" + esc(p.name) + '</h1><p class="lead">' + esc(p.summary) + '</p><div class="cfg" id="cfg"></div></div>' +
       '<div class="p-specs">' + (rows ? '<div class="specs-box"><h2>Specifications</h2><table class="specs">' + rows + "</table></div>" : "") +
       (p.datasheet ? '<a class="btn" style="margin-top:14px" href="' + esc(p.datasheet) + '" target="_blank" rel="noopener">Download datasheet</a>' : "") + "</div></div></div>";
@@ -494,7 +364,6 @@
     var box = el("cfg"); if (!box || !cfgState) return;
     var p = cfgState.product, steps = p.steps || [], sel = cfgState.sel;
     var done = steps.filter(function (s) { return sel[s.key] != null; }).length, v = resolved();
-    var gs = el("galSku"); if (gs) gs.textContent = v ? v.sku : (p.variants.length === 1 ? p.variants[0].sku : p.variants.length + " configurations");
     var h = '<div class="cfg-head"><h2>' + (steps.length ? "Choose options" : "Add to your quote") + "</h2>" + (steps.length ? "<span>" + done + " of " + steps.length + " chosen</span>" : "") + "</div>";
     if (steps.length) {
       h += '<div class="progress" aria-hidden="true"><i style="width:' + Math.round(done / steps.length * 100) + '%"></i></div>';
@@ -554,7 +423,7 @@
 
   /* ---------- QUOTE PAGE ---------- */
   function viewQuote() {
-    var h = '<div class="wrap">' + crumbs([["Quote list"]]) + '<div class="page-head"><h1><span class="sans">Your quote</span><span class="serif">list</span></h1><p>' +
+    var h = '<div class="wrap">' + crumbs([["Quote list"]]) + '<div class="page-head"><h1>Your quote list</h1><p>' +
       (store.persistent ? "Saved on this device." : "Your browser is not saving data, so this list lasts for this visit only.") + " Adjust quantities, add notes, then send it to us.</p></div>";
     if (!quote.length) return h + '<div class="empty" style="margin-bottom:72px">' + icon("list") + '<h3>Your quote list is empty</h3><p>Browse the catalogue and add the items you need.</p><a class="btn primary" href="#catalogue">Browse products</a></div></div>';
     return h + '<div class="q-layout"><div class="q-list" id="qList">' + quote.map(function (l, i) { return lineHtml(l, i, false); }).join("") + "</div>" +
@@ -584,8 +453,8 @@
     function f(id, label, type, req, extra) {
       return '<div class="field"><label for="' + id + '">' + label + (req ? ' <span class="req" aria-hidden="true">*</span>' : "") + '</label><input class="in" id="' + id + '" name="' + id + '" type="' + type + '"' + (req ? " required" : "") + ' value="' + esc(d[id] || "") + '" ' + (extra || "") + ' aria-describedby="' + id + 'Err"><span class="err-msg" id="' + id + 'Err"></span></div>';
     }
-    return '<div class="wrap">' + crumbs([["Quote list", "#quote"], ["Request quotation"]]) + '<div class="page-head"><h1><span class="sans">Request a</span><span class="serif">quotation</span></h1><p>Tell us where to send your quotation. Fields marked * are required.</p></div>' +
-      '<div class="q-layout"><form class="formcard" id="reqForm" novalidate><div class="form-grid">' +
+    return '<div class="wrap">' + crumbs([["Quote list", "#quote"], ["Request quotation"]]) + '<div class="page-head"><h1>Request quotation</h1><p>Tell us where to send your quotation. Fields marked * are required.</p></div>' +
+      '<div class="q-layout"><form class="summary" id="reqForm" novalidate style="position:static"><div class="form-grid">' +
       f("name", "Full name", "text", true, 'autocomplete="name" maxlength="100"') +
       f("org", "Organisation", "text", true, 'autocomplete="organization" maxlength="120" placeholder="Hospital, clinic, resort or pharmacy"') +
       f("phone", "Phone", "tel", true, 'autocomplete="tel" inputmode="tel" maxlength="30" placeholder="+960"') +
@@ -696,7 +565,7 @@
   function viewAbout() {
     return '<div class="wrap">' + crumbs([["About"]]) + '<div class="two" style="padding-bottom:56px"><div class="prose">' +
       '<svg class="about-logo" viewBox="0 0 1000 919" role="img" aria-label="Merit Medical Maldives logo"><use href="logo-full.svg#m"/></svg>' +
-      '<h1 class="title-mix" style="font-size:clamp(2.4rem,6vw,5rem)"><span class="sans">Care,</span><span class="serif">delivered</span></h1>' +
+      "<h1>About Merit Medical Maldives</h1>" +
       "<p>Merit Medical Maldives is the first subsidiary of VIYANA Pvt Ltd. We import, distribute, maintain and support medical devices, equipment and disposables for the healthcare and commercial sectors across the Maldives.</p>" +
       "<p>We supply medical consumables and pharmaceuticals to hospitals, clinics, resorts and pharmacies. Our office is at Carpenter Villa in Malé.</p>" +
       '<p><a class="btn primary" href="#catalogue">Browse the catalogue</a></p></div>' +
@@ -724,7 +593,7 @@
     return items.filter(function (x) { return x[2]; });
   }
   function viewContact() {
-    return '<div class="wrap">' + crumbs([["Contact"]]) + '<div class="page-head"><h1><span class="sans">Talk to</span><span class="serif">our sales team</span></h1><p>Questions about a product, bulk pricing or delivery to your island? Call or email us, or build a quote list and send it in one go.</p></div>' +
+    return '<div class="wrap">' + crumbs([["Contact"]]) + '<div class="page-head"><h1>Contact our sales team</h1><p>Questions about a product, bulk pricing or delivery to your island? Call or email us, or build a quote list and send it in one go.</p></div>' +
       '<div class="two" style="padding-bottom:72px"><div><div class="contact-list">' +
       contactItems().map(function (c) {
         var inner = '<span class="ico">' + icon(c[0]) + "</span><span><small>" + c[1] + "</small><b>" + esc(c[2]) + "</b></span>";
@@ -739,37 +608,23 @@
   }
   viewNotFound.title = function () { return "Not found"; };
 
-  /* ---------- chrome: full-screen menu ---------- */
-  var menu = el("menu"), menuBtn = el("menuBtn"), menuTimer;
-  function openMenu() {
-    clearTimeout(menuTimer); menu.hidden = false; void menu.offsetWidth;
-    menu.classList.add("open"); document.body.classList.add("menu-open"); document.body.style.overflow = "hidden";
-    hdr.classList.remove("hide");
-    menuBtn.setAttribute("aria-expanded", "true"); menuBtn.setAttribute("aria-label", "Close menu");
-    setTimeout(function () { var a = $(".menu-links a", menu); if (a) a.focus({ preventScroll: true }); }, 350);
-  }
-  function closeMenu() {
-    if (!menu.classList.contains("open")) return;
-    menu.classList.remove("open"); document.body.classList.remove("menu-open"); document.body.style.overflow = "";
-    menuBtn.setAttribute("aria-expanded", "false"); menuBtn.setAttribute("aria-label", "Open menu");
-    menuTimer = setTimeout(function () { menu.hidden = true; }, 800);
-  }
-  menuBtn.addEventListener("click", function () { if (menu.classList.contains("open")) closeMenu(); else openMenu(); });
-  menu.addEventListener("click", function (e) { var a = e.target.closest && e.target.closest("a"); if (a && a.getAttribute("href") === location.hash) closeMenu(); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeCart(); closeMenu(); } });
-  menu.addEventListener("keydown", function (e) {
-    if (e.key !== "Tab") return;
-    var f = $$("a", menu).concat([menuBtn]); var i = f.indexOf(document.activeElement);
-    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
-    else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+  /* ---------- chrome ---------- */
+  var drawer = el("drawer"), menuBtn = el("menuBtn");
+  function closeDrawer() { if (drawer && drawer.classList.contains("open")) { drawer.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); menuBtn.setAttribute("aria-label", "Open menu"); document.body.style.overflow = ""; } }
+  menuBtn.addEventListener("click", function () {
+    var open = !drawer.classList.contains("open");
+    drawer.classList.toggle("open", open); menuBtn.setAttribute("aria-expanded", String(open)); menuBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    document.body.style.overflow = open ? "hidden" : "";
   });
+  drawer.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("a")) closeDrawer(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeCart(); closeDrawer(); } });
+  window.addEventListener("resize", function () { if (window.innerWidth >= 900) closeDrawer(); });
 
   el("ftrCats").innerHTML = CATS.map(function (c) { return '<li><a href="#c-' + c.id + '">' + esc(c.name) + "</a></li>"; }).join("");
   el("ftrContact").innerHTML = contactItems().filter(function (c) { return c[0] !== "clock"; }).map(function (c) {
     return "<li>" + (c[3] ? '<a href="' + esc(c[3]) + '"' + (/^https?:/.test(c[3]) ? ' target="_blank" rel="noopener"' : "") + ">" + esc(c[0] === "fb" || c[0] === "li" ? c[1] : c[2]) + "</a>" : esc(c[2])) + "</li>";
   }).join("");
-  el("menuFoot").innerHTML = '<a href="tel:' + esc(tel()) + '">' + esc(CFG.phone) + '</a><a href="mailto:' + esc(CFG.email) + '">' + esc(CFG.email) + "</a><span>" + esc(CFG.address) + "</span>" +
-    (CFG.facebook ? '<a href="' + esc(CFG.facebook) + '" target="_blank" rel="noopener">Facebook</a>' : "") + (CFG.linkedin ? '<a href="' + esc(CFG.linkedin) + '" target="_blank" rel="noopener">LinkedIn</a>' : "");
+  el("drawerFoot").innerHTML = '<a href="tel:' + esc(tel()) + '">' + esc(CFG.phone) + '</a><br><a href="mailto:' + esc(CFG.email) + '">' + esc(CFG.email) + "</a>";
   el("yr").textContent = new Date().getFullYear();
 
   window.addEventListener("storage", function (e) {
