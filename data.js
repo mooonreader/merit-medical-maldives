@@ -11,12 +11,16 @@
    ===================================================================== */
 window.MM_CONFIG = {
   company: "Merit Medical Maldives",
-  phone: "+960 300 0000",
-  whatsapp: "9603000000",
-  email: "sales@meritmedical.mv",
-  address: "Malé, Republic of Maldives",
-  hours: "Sun – Thu · 8:00 – 17:00",
-  mapQuery: "Male, Maldives",
+  parent: "VIYANA Pvt Ltd",
+  phone: "+960 996 3080",
+  email: "merit.medical@viyana.biz",
+  address: "Carpenter Villa, 8th floor, Malé",
+  hours: "",            // add opening hours when confirmed, e.g. "Sun to Thu, 8:00 to 17:00"
+  mapQuery: "Carpenter Villa, Male, Maldives",
+  facebook: "https://www.facebook.com/p/Merit-Medical-Maldives-61579658083510/",
+  linkedin: "https://mv.linkedin.com/in/merit-medical-maldives-221072294",
+  website: "https://viyana.biz",
+  whatsapp: "",         // digits only, e.g. "9609963080", once confirmed
   // Quotation delivery. Paste a Web3Forms access key (free, emails the
   // sales inbox) or any endpoint that accepts JSON POST. Leave empty and
   // the site falls back to opening a pre-filled email to `email` above,
@@ -293,5 +297,14 @@ window.MM_PRODUCTS = [
   }
 ];
 
-window.MM_PARTNERS = ["CareLine", "ShieldPro", "AeroLife", "VitaSense", "FlowMed", "Atoll Health"];
+// Brands shown on the home page. Replace with the manufacturers you actually
+// distribute; put each logo file next to index.html and set `logo`.
+// Without a logo file, a clean wordmark is drawn from the name.
+window.MM_BRANDS = [
+  { name: "CareLine", logo: "" },
+  { name: "ShieldPro", logo: "" },
+  { name: "AeroLife", logo: "" },
+  { name: "VitaSense", logo: "" },
+  { name: "FlowMed", logo: "" }
+];
 window.MM_ISLANDS = ["Malé", "Hulhumalé", "Villimalé", "Addu City", "Fuvahmulah", "Kulhudhuffushi", "Thinadhoo", "Naifaru", "Eydhafushi", "Other island / resort"];

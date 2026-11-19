@@ -1,37 +1,20 @@
-# Merit Medical Maldives — Product catalogue & quotation site
+# Merit Medical Maldives: catalogue and quotation site
 
-Release 1 of the site described in *Website Scope & Deliverables* (Nov 2026).
-Static, dependency-free, mobile-first. Runs on GitHub Pages or any static host.
+Static site, no build step and no dependencies. Works on GitHub Pages or any static host.
 
-## What's in it
-- Home, About, Contact (map, phone, email, WhatsApp), brands section
-- Catalogue with categories, search by name/brand/SKU, filters
-- Product pages with specifications and datasheet links
-- Step-by-step configurator: unavailable combinations are disabled, every
-  finished configuration resolves to exactly one SKU
-- Quote list saved on the device (localStorage, with safe fallback), quantity + note per line
-- Quotation request form with validation, honeypot + timing spam protection,
-  unique reference numbers (`MMQ-YYMMDD-XXXX`), confirmation page, copy/print
+## Files
+- `index.html`: page shell, header, footer, cart drawer
+- `styles.css`: light and dark themes (toggle in the header, remembered per device)
+- `data.js`: company details, categories, products, brands, islands
+- `app.js`: pages, search, configurator, quote list, request flow
+- `logo-full.svg`, `logo-mark.svg`, `favicon.svg`: the logo, traced to vector from the official artwork
 
-## Configure before launch — `data.js`
-| Setting | What to put |
-|---|---|
-| `phone`, `whatsapp`, `email`, `address`, `hours` | Real contact details (currently placeholders) |
-| `web3formsKey` | Free key from web3forms.com tied to the sales inbox → requests are emailed automatically, customer gets a copy |
-| `formEndpoint` | Alternative: any URL accepting a JSON POST (e.g. a Zoho Flow webhook for Release 2) |
+## Before launch, in `data.js`
+- `hours` and `whatsapp`: add when confirmed
+- `web3formsKey`: a free key from web3forms.com sends each request to the sales inbox automatically.
+  Without it, sending a request opens the customer's email app with everything filled in.
+- `MM_PRODUCTS`: sample catalogue. Replace with the real items (Zoho export in Release 2).
+  Add `image: "photos/gloves.jpg"` to any product to show a photo instead of the icon.
+- `MM_BRANDS`: replace with the manufacturers you distribute, and set `logo` to each logo file.
 
-If neither is set, submitting opens the visitor's email app with the full request
-pre-filled, so no request is ever silently lost.
-
-## Products
-`MM_PRODUCTS` in `data.js` holds the sample catalogue. Each family has `steps`
-(configurator order) and `variants` (one per Zoho SKU). Replace with the Zoho
-export in Release 2. Product brands shown are placeholders.
-
-## Structure
-```
-index.html  shell, header, footer
-styles.css  all styling
-data.js     config + catalogue
-app.js      router, configurator, quote list, request flow
-```
+Pages use simple links: `#catalogue`, `#c-gloves`, `#p-oxygen-concentrator`, `#quote`, `#about`, `#contact`.
