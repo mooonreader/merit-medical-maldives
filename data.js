@@ -311,14 +311,17 @@ window.MM_PRODUCTS = [
   }
 ];
 
-// Brands shown on the home page. Replace with the manufacturers you actually
-// distribute; put each logo file next to index.html and set `logo`.
-// Without a logo file, a clean wordmark is drawn from the name.
+// Brands shown on the home page. Only brands confirmed as supplied by
+// Merit Medical Maldives (from Maldives Government Gazette award sheets).
 window.MM_BRANDS = [
-  { name: "CareLine", logo: "" },
-  { name: "ShieldPro", logo: "" },
-  { name: "AeroLife", logo: "" },
-  { name: "VitaSense", logo: "" },
-  { name: "FlowMed", logo: "" }
+  { name: "Ansell", line: "ENCORE surgical gloves", logo: "img/brand-ansell.png", url: "https://www.ansell.com" },
+  { name: "Aerogen", line: "Aerogen Solo nebuliser", logo: "img/brand-aerogen.png", url: "https://www.aerogen.com" }
+];
+
+// Customers, confirmed from Maldives Government Gazette award data sheets.
+window.MM_CUSTOMERS = [
+  { name: "Hulhumalé Hospital", place: "Hulhumalé", since: "2023", what: "Medical consumables, equipment and maintenance items" },
+  { name: "Ungoofaaru Regional Hospital", place: "Raa Atoll", since: "2025", what: "Examination and surgical gloves, medical consumables" },
+  { name: "Raa Atoll Health Centres", place: "Raa Atoll", since: "2025", what: "Medical consumables, with Ungoofaaru Regional Hospital" }
 ];
 window.MM_ISLANDS = ["Malé", "Hulhumalé", "Villimalé", "Addu City", "Fuvahmulah", "Kulhudhuffushi", "Thinadhoo", "Naifaru", "Eydhafushi", "Other island / resort"];

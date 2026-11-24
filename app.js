@@ -9,6 +9,7 @@
   var CATS = window.MM_CATEGORIES || [];
   var PRODUCTS = window.MM_PRODUCTS || [];
   var BRANDS = window.MM_BRANDS || [];
+  var CUSTOMERS = window.MM_CUSTOMERS || [];
   var app = document.getElementById("app");
 
   /* ---------- utilities ---------- */
@@ -274,20 +275,28 @@
     var featured = ["nitrile-exam-gloves", "oxygen-concentrator", "surgical-masks", "bp-monitor"].map(function (id) { return byId(PRODUCTS, id); }).filter(Boolean);
     h += '<section class="wrap shelf"><div class="shelf-head"><h2>Most requested</h2><a href="#catalogue">See all ' + icon("arrow") + '</a></div><div class="rail">' + featured.map(productCard).join("") + "</div></section>";
 
+    if (CUSTOMERS.length) h += '<section class="wrap shelf"><div class="shelf-head"><h2>Trusted by Maldivian healthcare</h2></div><div class="customers">' +
+      CUSTOMERS.map(function (c) { return '<div class="cust"><span class="cust-ico">' + icon("building") + '</span><span class="cust-txt"><b>' + esc(c.name) + "</b><small>" + esc(c.place) + " · Customer since " + esc(c.since) + "</small><em>" + esc(c.what) + "</em></span></div>"; }).join("") +
+      '</div><p class="src-note">From Maldives Government Gazette contract awards.</p></section>';
+
     h += '<section class="wrap shelf"><div class="shelf-head"><h2>All products</h2><span class="muted">' + PRODUCTS.length + ' lines</span></div><div class="grid-products">' + PRODUCTS.map(productCard).join("") + "</div></section>";
 
     h += '<section class="wrap shelf"><div class="how">' +
       [["sliders", "Pick", "Exact size and pack"], ["list", "List", "Saved on this device"], ["send", "Send", "We reply with prices"]]
         .map(function (s) { return "<div>" + icon(s[0]) + "<span><b>" + s[1] + "</b><small>" + s[2] + "</small></span></div>"; }).join("") + "</div></section>";
 
-    if (BRANDS.length) h += '<section class="wrap shelf"><div class="shelf-head"><h2>Brands we supply</h2></div><div class="brands">' + BRANDS.map(brandCell).join("") + "</div></section>";
+    if (BRANDS.length) {
+      var reps = Math.max(4, Math.ceil(8 / BRANDS.length));
+      var seq = ""; for (var r = 0; r < reps; r++) seq += BRANDS.map(brandCell).join("");
+      h += '<section class="shelf brands-sec"><div class="wrap shelf-head"><h2>Brands we supply</h2></div><div class="brand-marquee" aria-label="Brands we supply: ' + esc(BRANDS.map(function (b) { return b.name; }).join(", ")) + '"><div class="brand-track"><div class="brand-seq">' + seq + '</div><div class="brand-seq" aria-hidden="true">' + seq + "</div></div></div></section>";
+    }
     return h + band() + "</div>";
   }
   viewHome.after = bindSearchForms;
   function brandCell(b) {
-    var inner = b.logo ? '<img src="' + esc(b.logo) + '" alt="' + esc(b.name) + '" loading="lazy">' :
-      '<span class="wordmark"><i aria-hidden="true">' + esc(b.name.charAt(0)) + "</i>" + esc(b.name) + "</span>";
-    return '<div class="brand-cell">' + inner + "</div>";
+    var inner = (b.logo ? '<img src="' + esc(b.logo) + '" alt="' + esc(b.name) + '" loading="lazy" decoding="async">' :
+      '<span class="wordmark"><i aria-hidden="true">' + esc(b.name.charAt(0)) + "</i>" + esc(b.name) + "</span>") + (b.line ? "<small>" + esc(b.line) + "</small>" : "");
+    return b.url ? '<a class="brand-cell" href="' + esc(b.url) + '" target="_blank" rel="noopener" tabindex="-1">' + inner + "</a>" : '<div class="brand-cell">' + inner + "</div>";
   }
   function bindSearchForms() {
     $$("[data-search]").forEach(function (f) {

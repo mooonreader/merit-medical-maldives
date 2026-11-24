@@ -556,3 +556,27 @@ main:focus,main:focus-visible{outline:none}
 .brand-cell{min-height:64px;padding:12px}
 .wordmark{font-size:.95rem}
 .wordmark i{width:20px;height:20px;font-size:.66rem;border-radius:5px}
+
+/* customers */
+.customers{display:grid;gap:8px;grid-template-columns:1fr}
+@media(min-width:700px){.customers{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}}
+.cust{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--surface);box-shadow:0 1px 2px rgba(15,29,43,.06)}
+.cust-ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand);flex:none}
+.cust-ico svg{width:20px;height:20px}
+.cust-txt{min-width:0}
+.cust b{display:block;font-size:.92rem;line-height:1.25}
+.cust small{display:block;font-size:.74rem;font-weight:600;color:var(--leaf-ink);margin-top:2px}
+.cust em{display:block;font-style:normal;font-size:.76rem;color:var(--muted);margin-top:3px;line-height:1.35}
+.src-note{font-size:.7rem;color:var(--muted);margin:8px 0 0}
+
+/* brand marquee: slides slowly to the left, pauses on hover */
+.brands-sec{padding-bottom:6px}
+.brand-marquee{overflow:hidden;padding:4px 0 10px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.brand-track{display:flex;width:max-content;animation:brandSlide 38s linear infinite}
+.brand-marquee:hover .brand-track{animation-play-state:paused}
+.brand-seq{display:flex;gap:12px;padding-right:12px}
+.brand-marquee .brand-cell{flex:none;width:170px;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px 16px;border:0;border-radius:12px;background:#fff;box-shadow:0 1px 2px rgba(15,29,43,.07);text-decoration:none;color:#5a6773}
+.brand-marquee .brand-cell img{height:34px;width:auto;max-width:130px;object-fit:contain}
+.brand-marquee .brand-cell small{font-size:.68rem;font-weight:600;text-align:center;line-height:1.2}
+@keyframes brandSlide{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.brand-track{animation:none}.brand-marquee{overflow-x:auto}}
