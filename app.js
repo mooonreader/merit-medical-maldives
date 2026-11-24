@@ -214,11 +214,20 @@
   }
   var ROUTES = { home: viewHome, catalogue: viewCatalogue, product: viewProduct, quote: viewQuote, request: viewRequest, done: viewDone, about: viewAbout, contact: viewContact };
   var lastHash = null;
+  var revealIO = ("IntersectionObserver" in window && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) ?
+    new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("seen"); revealIO.unobserve(e.target); } }); }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }) : null;
+  function observeReveals() {
+    var els = $$(".reveal", app);
+    if (!revealIO) { els.forEach(function (el) { el.classList.add("seen"); }); return; }
+    document.documentElement.classList.add("reveal-on");
+    els.forEach(function (el) { revealIO.observe(el); });
+  }
   function render() {
     var r = currentRoute(), view = ROUTES[r.name] || viewNotFound;
     try {
       app.innerHTML = '<div class="page">' + view(r) + "</div>";
       if (view.after) view.after(r);
+      observeReveals();
     } catch (err) {
       if (window.console) console.error(err);
       app.innerHTML = '<div class="wrap section"><div class="empty"><h3>Something went wrong</h3><p>Please reload the page. Your quote list is saved.</p><a class="btn primary" href="#home">Back to home</a></div></div>';
@@ -273,26 +282,32 @@
       '<div class="perks"><span>' + icon("shield") + "MFDA authorised importer</span><span>" + icon("boat") + "Delivery across the atolls</span><span>" + icon("send") + "Quote in minutes</span></div></section>";
 
     var featured = ["nitrile-exam-gloves", "oxygen-concentrator", "surgical-masks", "bp-monitor"].map(function (id) { return byId(PRODUCTS, id); }).filter(Boolean);
-    h += '<section class="wrap shelf"><div class="shelf-head"><h2>Most requested</h2><a href="#catalogue">See all ' + icon("arrow") + '</a></div><div class="rail">' + featured.map(productCard).join("") + "</div></section>";
+    h += '<section class="wrap shelf reveal"><div class="shelf-head"><h2>Most requested</h2><a href="#catalogue">See all ' + icon("arrow") + '</a></div><div class="rail">' + featured.map(productCard).join("") + "</div></section>";
 
-    if (CUSTOMERS.length) h += '<section class="wrap shelf"><div class="shelf-head"><h2>Trusted by Maldivian healthcare</h2></div><div class="customers">' +
-      CUSTOMERS.map(function (c) { return '<div class="cust">' + (c.logo ? '<span class="cust-logo"><img src="' + esc(c.logo) + '" alt="' + esc(c.name) + ' logo" width="200" height="80" loading="lazy" decoding="async"></span>' : '<span class="cust-ico">' + icon("building") + '</span>') + '<span class="cust-txt"><b>' + esc(c.name) + "</b><small>" + esc(c.place) + " · Customer since " + esc(c.since) + "</small><em>" + esc(c.what) + "</em></span></div>"; }).join("") +
-      '</div><p class="src-note">From Maldives Government Gazette contract awards.</p></section>';
+    if (CUSTOMERS.length) h += '<section class="zone zone-blue reveal"><div class="wrap zone-head"><span class="eyebrow">Our customers</span><h2>Trusted by Maldivian healthcare</h2><p>Public hospitals and island health centres buy from Merit Medical Maldives through government tenders.</p></div>' +
+      marquee(CUSTOMERS.map(custTile), "cust-marquee", "Customers: " + CUSTOMERS.map(function (c) { return c.name; }).join(", "), 6) +
+      '<p class="wrap src-note">Source: Maldives Government Gazette contract awards.</p></section>';
 
-    h += '<section class="wrap shelf"><div class="shelf-head"><h2>All products</h2><span class="muted">' + PRODUCTS.length + ' lines</span></div><div class="grid-products">' + PRODUCTS.map(productCard).join("") + "</div></section>";
+    h += '<section class="wrap shelf reveal"><div class="shelf-head"><h2>All products</h2><span class="muted">' + PRODUCTS.length + ' lines</span></div><div class="grid-products">' + PRODUCTS.map(productCard).join("") + "</div></section>";
 
-    h += '<section class="wrap shelf"><div class="how">' +
-      [["sliders", "Pick", "Exact size and pack"], ["list", "List", "Saved on this device"], ["send", "Send", "We reply with prices"]]
-        .map(function (s) { return "<div>" + icon(s[0]) + "<span><b>" + s[1] + "</b><small>" + s[2] + "</small></span></div>"; }).join("") + "</div></section>";
+    h += '<section class="zone zone-leaf reveal"><div class="wrap"><div class="zone-head"><span class="eyebrow">How ordering works</span><h2>One list. One quotation.</h2></div><ol class="steps">' +
+      [["sliders", "Pick", "Choose the exact size, material and pack for each item."], ["list", "List", "Your quote list is saved on this device. No account needed."], ["send", "Send", "We reply with prices and delivery for your island."]]
+        .map(function (s, i) { return '<li class="reveal" style="--d:' + (i * 90) + 'ms"><span class="step-n">' + (i + 1) + "</span>" + icon(s[0]) + "<b>" + s[1] + "</b><small>" + s[2] + "</small></li>"; }).join("") + "</ol></div></section>";
 
-    if (BRANDS.length) {
-      var reps = Math.max(4, Math.ceil(8 / BRANDS.length));
-      var seq = ""; for (var r = 0; r < reps; r++) seq += BRANDS.map(brandCell).join("");
-      h += '<section class="shelf brands-sec"><div class="wrap shelf-head"><h2>Brands we supply</h2></div><div class="brand-marquee" aria-label="Brands we supply: ' + esc(BRANDS.map(function (b) { return b.name; }).join(", ")) + '"><div class="brand-track"><div class="brand-seq">' + seq + '</div><div class="brand-seq" aria-hidden="true">' + seq + "</div></div></div></section>";
-    }
+    if (BRANDS.length) h += '<section class="zone zone-plain reveal"><div class="wrap zone-head"><span class="eyebrow">Brands</span><h2>Brands we supply</h2></div>' +
+      marquee(BRANDS.map(brandCell), "brand-marquee", "Brands we supply: " + BRANDS.map(function (b) { return b.name; }).join(", "), 8) + "</section>";
     return h + band() + "</div>";
   }
   viewHome.after = bindSearchForms;
+  function marquee(cells, cls, label, min) {
+    var reps = Math.max(2, Math.ceil(min / cells.length)), seq = "";
+    for (var r = 0; r < reps; r++) seq += cells.join("");
+    return '<div class="marquee ' + cls + '" role="region" aria-label="' + esc(label) + '"><div class="marquee-track"><div class="marquee-seq">' + seq + '</div><div class="marquee-seq" aria-hidden="true">' + seq + "</div></div></div>";
+  }
+  function custTile(c) {
+    return '<div class="cust-tile">' + (c.logo ? '<img src="' + esc(c.logo) + '" alt="' + esc(c.name) + '" decoding="async">' : icon("building")) +
+      "<span><b>" + esc(c.name) + "</b><small>" + esc(c.place) + " · since " + esc(c.since) + "</small></span></div>";
+  }
   function brandCell(b) {
     var inner = (b.logo ? '<img src="' + esc(b.logo) + '" alt="' + esc(b.name) + '" decoding="async">' :
       '<span class="wordmark"><i aria-hidden="true">' + esc(b.name.charAt(0)) + "</i>" + esc(b.name) + "</span>") + (b.line ? "<small>" + esc(b.line) + "</small>" : "");
