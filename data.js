@@ -320,8 +320,8 @@ window.MM_BRANDS = [
 
 // Customers, confirmed from Maldives Government Gazette award data sheets.
 window.MM_CUSTOMERS = [
-  { name: "Hulhumalé Hospital", place: "Hulhumalé", since: "2023", what: "Medical consumables, equipment and maintenance items" },
-  { name: "Ungoofaaru Regional Hospital", place: "Raa Atoll", since: "2025", what: "Examination and surgical gloves, medical consumables" },
-  { name: "Raa Atoll Health Centres", place: "Raa Atoll", since: "2025", what: "Medical consumables, with Ungoofaaru Regional Hospital" }
+  { name: "Hulhumalé Hospital", logo: "img/cust-hulhumale.webp", place: "Hulhumalé", since: "2023", what: "Medical consumables, equipment and maintenance items" },
+  { name: "Ungoofaaru Regional Hospital", logo: "img/cust-urh.webp", place: "Raa Atoll", since: "2025", what: "Examination and surgical gloves, medical consumables" },
+  { name: "Raa Atoll Health Centres", logo: "img/cust-moh.webp", place: "Raa Atoll", since: "2025", what: "Medical consumables, with Ungoofaaru Regional Hospital" }
 ];
 window.MM_ISLANDS = ["Malé", "Hulhumalé", "Villimalé", "Addu City", "Fuvahmulah", "Kulhudhuffushi", "Thinadhoo", "Naifaru", "Eydhafushi", "Other island / resort"];

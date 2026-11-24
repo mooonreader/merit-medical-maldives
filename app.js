@@ -276,7 +276,7 @@
     h += '<section class="wrap shelf"><div class="shelf-head"><h2>Most requested</h2><a href="#catalogue">See all ' + icon("arrow") + '</a></div><div class="rail">' + featured.map(productCard).join("") + "</div></section>";
 
     if (CUSTOMERS.length) h += '<section class="wrap shelf"><div class="shelf-head"><h2>Trusted by Maldivian healthcare</h2></div><div class="customers">' +
-      CUSTOMERS.map(function (c) { return '<div class="cust"><span class="cust-ico">' + icon("building") + '</span><span class="cust-txt"><b>' + esc(c.name) + "</b><small>" + esc(c.place) + " · Customer since " + esc(c.since) + "</small><em>" + esc(c.what) + "</em></span></div>"; }).join("") +
+      CUSTOMERS.map(function (c) { return '<div class="cust">' + (c.logo ? '<span class="cust-logo"><img src="' + esc(c.logo) + '" alt="' + esc(c.name) + ' logo" width="200" height="80" loading="lazy" decoding="async"></span>' : '<span class="cust-ico">' + icon("building") + '</span>') + '<span class="cust-txt"><b>' + esc(c.name) + "</b><small>" + esc(c.place) + " · Customer since " + esc(c.since) + "</small><em>" + esc(c.what) + "</em></span></div>"; }).join("") +
       '</div><p class="src-note">From Maldives Government Gazette contract awards.</p></section>';
 
     h += '<section class="wrap shelf"><div class="shelf-head"><h2>All products</h2><span class="muted">' + PRODUCTS.length + ' lines</span></div><div class="grid-products">' + PRODUCTS.map(productCard).join("") + "</div></section>";
