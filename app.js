@@ -294,7 +294,7 @@
   }
   viewHome.after = bindSearchForms;
   function brandCell(b) {
-    var inner = (b.logo ? '<img src="' + esc(b.logo) + '" alt="' + esc(b.name) + '" loading="lazy" decoding="async">' :
+    var inner = (b.logo ? '<img src="' + esc(b.logo) + '" alt="' + esc(b.name) + '" decoding="async">' :
       '<span class="wordmark"><i aria-hidden="true">' + esc(b.name.charAt(0)) + "</i>" + esc(b.name) + "</span>") + (b.line ? "<small>" + esc(b.line) + "</small>" : "");
     return b.url ? '<a class="brand-cell" href="' + esc(b.url) + '" target="_blank" rel="noopener" tabindex="-1">' + inner + "</a>" : '<div class="brand-cell">' + inner + "</div>";
   }
