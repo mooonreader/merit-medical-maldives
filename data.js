@@ -41,6 +41,7 @@ window.MM_CATEGORIES = [
 window.MM_PRODUCTS = [
   {
     id: "nitrile-exam-gloves",
+    image: "img/nitrile-exam-gloves.webp",
     category: "gloves",
     name: "Examination Gloves",
     brand: "CareLine",
@@ -77,6 +78,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "surgical-gloves-sterile",
+    image: "img/surgical-gloves-sterile.webp",
     category: "gloves",
     name: "Sterile Surgical Gloves",
     brand: "CareLine",
@@ -99,6 +101,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "surgical-masks",
+    image: "img/surgical-masks.webp",
     category: "masks",
     name: "Surgical & Respirator Masks",
     brand: "ShieldPro",
@@ -121,6 +124,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "face-shield",
+    image: "img/face-shield.webp",
     category: "masks",
     name: "Full Face Shield",
     brand: "ShieldPro",
@@ -131,6 +135,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "oxygen-concentrator",
+    image: "img/oxygen-concentrator.webp",
     category: "respiratory",
     name: "Oxygen Concentrator",
     brand: "AeroLife",
@@ -153,6 +158,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "nebuliser",
+    image: "img/nebuliser.webp",
     category: "respiratory",
     name: "Compressor Nebuliser",
     brand: "AeroLife",
@@ -163,6 +169,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "nasal-cannula",
+    image: "img/nasal-cannula.webp",
     category: "respiratory",
     name: "Nasal Oxygen Cannula",
     brand: "AeroLife",
@@ -178,6 +185,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "bp-monitor",
+    image: "img/bp-monitor.webp",
     category: "diagnostics",
     name: "Digital Blood Pressure Monitor",
     brand: "VitaSense",
@@ -193,6 +201,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "pulse-oximeter",
+    image: "img/pulse-oximeter.webp",
     category: "diagnostics",
     name: "Fingertip Pulse Oximeter",
     brand: "VitaSense",
@@ -203,6 +212,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "rapid-tests",
+    image: "img/rapid-tests.webp",
     category: "diagnostics",
     name: "Rapid Diagnostic Test Kits",
     brand: "VitaSense",
@@ -219,6 +229,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "syringes",
+    image: "img/syringes.webp",
     category: "injection",
     name: "Disposable Syringes",
     brand: "FlowMed",
@@ -249,6 +260,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "iv-cannula",
+    image: "img/iv-cannula.webp",
     category: "injection",
     name: "IV Cannula with Injection Port",
     brand: "FlowMed",
@@ -262,6 +274,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "gauze-swabs",
+    image: "img/gauze-swabs.webp",
     category: "wound",
     name: "Gauze Swabs",
     brand: "CareLine",
@@ -281,6 +294,7 @@ window.MM_PRODUCTS = [
   },
   {
     id: "adhesive-dressing",
+    image: "img/adhesive-dressing.webp",
     category: "wound",
     name: "Adhesive Island Dressing",
     brand: "CareLine",

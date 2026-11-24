@@ -44,6 +44,7 @@
     pulse: '<rect x="3" y="4" width="18" height="13" rx="2.5"/><path d="M6.5 11h2.5l1.5-3 2.5 6 1.5-3.5 1 .5h2M9 21h6M12 17v4"/>',
     syringe: '<path d="M17 2.5l4.5 4.5M19.2 4.8l-3 3M15 6l3 3-9.5 9.5-3-3zM5.5 15.5L2.5 18.5l3 3 3-3M10.5 10.5l1.5 1.5M8.5 12.5l1.5 1.5M12.5 8.5l1.5 1.5"/>',
     bandage: '<rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-40 12 12)"/><path d="M10.5 10.5l3 3M13.5 10.5l-3 3"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
     search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
@@ -107,6 +108,7 @@
     var n = quote.length, c = el("cartCount"), b = el("cartBtn");
     if (c) c.textContent = n;
     if (b) b.setAttribute("aria-label", "Quote list, " + plural(n, "item"));
+    var tc = el("tabCount"); if (tc) { tc.textContent = n; tc.hidden = n === 0; }
   }
 
   /* ---------- cart drawer ---------- */
@@ -174,6 +176,17 @@
     else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
   });
 
+  /* ---------- quick add from cards ---------- */
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-quick]"); if (!b) return;
+    e.preventDefault();
+    var p = byId(PRODUCTS, b.getAttribute("data-quick")); if (!p) return;
+    if (p.steps && p.steps.length) { location.hash = "p-" + p.id; return; }
+    addLine(p, p.variants[0], 1, "");
+    b.classList.add("added"); setTimeout(function () { b.classList.remove("added"); }, 900);
+    toast("Added " + p.name + " to your quote");
+  });
+
   /* ---------- toast ---------- */
   var toastTimer;
   function toast(text) {
@@ -213,6 +226,10 @@
       var k = a.getAttribute("data-nav"), on = k === r.name || (k === "catalogue" && r.name === "product");
       a.classList.toggle("on", on); if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
+    $$(".tabbar a").forEach(function (t) {
+      var k = t.getAttribute("data-tab"), on = k === r.name || (k === "catalogue" && r.name === "product") || (k === "quote" && (r.name === "request" || r.name === "done"));
+      t.classList.toggle("on", on); if (on) t.setAttribute("aria-current", "page"); else t.removeAttribute("aria-current");
+    });
     closeDrawer();
     if (lastHash !== null && lastHash !== location.hash) { window.scrollTo(0, 0); try { app.focus({ preventScroll: true }); } catch (e) {} }
     lastHash = location.hash;
@@ -229,12 +246,13 @@
   }
   function productCard(p) {
     var cfg = p.steps && p.steps.length;
-    return '<a class="pcard" href="#p-' + esc(p.id) + '"><div class="pimg">' + productVisual(p, "") + (cfg ? '<span class="tag">' + plural(p.variants.length, "option") + "</span>" : "") + "</div>" +
-      '<div class="pbody"><span class="brandline">' + esc(p.brand) + "</span><h3>" + esc(p.name) + "</h3><p>" + esc(p.summary) + "</p>" +
-      '<span class="go">' + (cfg ? "Choose options" : "Add to quote") + icon("arrow") + "</span></div></a>";
+    return '<article class="pcard"><a class="pcard-link" href="#p-' + esc(p.id) + '"><div class="pimg">' + productVisual(p, p.name) +
+      (cfg ? '<span class="tag">' + plural(p.variants.length, "option") + "</span>" : "") + "</div>" +
+      '<div class="pbody"><h3>' + esc(p.name) + '</h3><span class="brandline">' + esc(p.brand) + '</span><span class="meta">' + (cfg ? "Choose size &amp; pack" : "Ready to add") + "</span></div></a>" +
+      '<button class="quick" type="button" data-quick="' + esc(p.id) + '" aria-label="' + (cfg ? "Choose options for " : "Add to quote: ") + esc(p.name) + '">' + icon(cfg ? "sliders" : "plus") + "</button></article>";
   }
   function band() {
-    return '<section class="section"><div class="wrap"><div class="band"><div><h2>Ordering for a hospital, clinic or resort?</h2><p>Send us your full list and we will come back with pricing and delivery times for your island.</p></div>' +
+    return '<section class="section"><div class="wrap"><div class="band"><div><h2>Ordering for a hospital, clinic or resort?</h2><p>Send your full list. We reply with pricing and delivery for your island.</p></div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="#catalogue">Start a quote</a><a class="btn ghost" href="tel:' + esc(tel()) + '">Call ' + esc(CFG.phone) + "</a></div></div></div></section>";
   }
   function tel() { return String(CFG.phone || "").replace(/[^\d+]/g, ""); }
@@ -244,28 +262,26 @@
 
   /* ---------- HOME ---------- */
   function viewHome() {
-    var h = '<section class="hero"><div class="wrap hero-grid"><div>' +
-      "<h1>Medical supplies for every island in the Maldives</h1>" +
-      '<p class="lead">Gloves, protective equipment, respiratory devices, diagnostics and everyday consumables. Choose exactly what you need, build one list, and we reply with a quotation.</p>' +
-      searchBox("hq", "", "", "Search gloves, masks, oxygen, item code…") +
-      '<div class="trust"><span>' + icon("shield") + "MFDA authorised importer</span><span>" + icon("boat") + "Delivery across the atolls</span><span>" + icon("building") + "Part of VIYANA Pvt Ltd</span></div>" +
-      '</div><div class="dir"><h2>Browse by category</h2>' +
-      CATS.map(function (c) {
-        var n = PRODUCTS.filter(function (p) { return p.category === c.id; }).length;
-        return '<a href="#c-' + c.id + '"><span class="ico">' + catIcon(c.id) + "</span><span><b>" + esc(c.name) + "</b><small>" + plural(n, "product line") + "</small></span>" + icon("arrow", "arr") + "</a>";
-      }).join("") + "</div></div></section>";
-
-    h += '<section class="section"><div class="wrap"><div class="sec-head"><h2>Requesting a quote takes a few minutes</h2><p>No account and no checkout. Pricing comes back from our sales team.</p></div><div class="how">' +
-      [["sliders", "Pick the exact item", "Choose material, size and pack one step at a time. Combinations we do not stock cannot be selected."],
-       ["list", "Build one list", "Add everything your ward, clinic or resort needs, with quantities and notes. It stays saved on this device."],
-       ["send", "Send the request", "You get a reference number straight away, and our team replies with prices and delivery for your island."]]
-        .map(function (s) { return "<div>" + icon(s[0]) + "<span><h3>" + s[1] + "</h3><p>" + s[2] + "</p></span></div>"; }).join("") + "</div></div></section>";
+    var h = '<div class="home">' +
+      '<div class="home-search wrap">' + searchBox("hq", "", "", "Search gloves, masks, oxygen…") + "</div>" +
+      '<nav class="circles wrap" aria-label="Categories">' + CATS.map(function (c) {
+        var first = PRODUCTS.filter(function (p) { return p.category === c.id && p.image; })[0];
+        return '<a class="circle" href="#c-' + c.id + '"><span class="circle-img">' + (first ? '<img src="' + esc(first.image) + '" alt="" loading="lazy">' : catIcon(c.id)) + "</span><span>" + esc(c.name.split(" & ")[0].replace(" Equipment", "").replace(" Monitoring", "")) + "</span></a>";
+      }).join("") + "</nav>" +
+      '<section class="wrap"><div class="promo"><div><b>Medical supplies for every island</b><span>Build one list, get one quotation. No account needed.</span></div><a class="btn primary sm" href="#catalogue">Shop all</a></div>' +
+      '<div class="perks"><span>' + icon("shield") + "MFDA authorised importer</span><span>" + icon("boat") + "Delivery across the atolls</span><span>" + icon("send") + "Quote in minutes</span></div></section>";
 
     var featured = ["nitrile-exam-gloves", "oxygen-concentrator", "surgical-masks", "bp-monitor"].map(function (id) { return byId(PRODUCTS, id); }).filter(Boolean);
-    h += '<section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>Most requested</h2><a class="link" href="#catalogue">See all products</a></div><div class="grid-products">' + featured.map(productCard).join("") + "</div></div></section>";
+    h += '<section class="wrap shelf"><div class="shelf-head"><h2>Most requested</h2><a href="#catalogue">See all ' + icon("arrow") + '</a></div><div class="rail">' + featured.map(productCard).join("") + "</div></section>";
 
-    if (BRANDS.length) h += '<section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>Brands we supply</h2></div><div class="brands">' + BRANDS.map(brandCell).join("") + "</div></div></section>";
-    return h + band();
+    h += '<section class="wrap shelf"><div class="shelf-head"><h2>All products</h2><span class="muted">' + PRODUCTS.length + ' lines</span></div><div class="grid-products">' + PRODUCTS.map(productCard).join("") + "</div></section>";
+
+    h += '<section class="wrap shelf"><div class="how">' +
+      [["sliders", "Pick", "Exact size and pack"], ["list", "List", "Saved on this device"], ["send", "Send", "We reply with prices"]]
+        .map(function (s) { return "<div>" + icon(s[0]) + "<span><b>" + s[1] + "</b><small>" + s[2] + "</small></span></div>"; }).join("") + "</div></section>";
+
+    if (BRANDS.length) h += '<section class="wrap shelf"><div class="shelf-head"><h2>Brands we supply</h2></div><div class="brands">' + BRANDS.map(brandCell).join("") + "</div></section>";
+    return h + band() + "</div>";
   }
   viewHome.after = bindSearchForms;
   function brandCell(b) {
